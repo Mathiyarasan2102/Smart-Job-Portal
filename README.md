@@ -13,7 +13,7 @@
 - [Architecture & Design](#-architecture--design)
 - [Getting Started](#-getting-started)
 - [Database Schema](#-database-schema)
-- [Screenshots](#-screenshots)
+
 
 ---
 
@@ -143,17 +143,7 @@ The core database consists of three primary tables linked by foreign keys:
 
 ---
 
-## 📸 Screenshots
 
-*(Placeholders for project screenshots - highly recommended adding these!)*
-
-| Landing Page | Job Search |
-|:---:|:---:|
-| ![Landing Page](/api/placeholder/400/320) | ![Job Search](/api/placeholder/400/320) |
-
-| Recruiter Dashboard | Application Management |
-|:---:|:---:|
-| ![Dashboard](/api/placeholder/400/320) | ![ATS](/api/placeholder/400/320) |
 
 ---
 
