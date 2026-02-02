@@ -13,6 +13,7 @@ router.use(authMiddleware.protect);
 
 // Recruiter only
 router.post('/', authMiddleware.restrictTo('recruiter'), jobController.createJob);
+router.delete('/:id', authMiddleware.restrictTo('recruiter'), jobController.deleteJob);
 
 
 module.exports = router;

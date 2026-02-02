@@ -77,6 +77,14 @@ h4 {
   @apply bg-transparent border border-border-light text-text-main hover:bg-[#222];
 }
 
+.btn-sm {
+  @apply px-4 py-2 text-sm;
+}
+
+.btn-icon {
+  @apply p-2 aspect-square flex items-center justify-center;
+}
+
 /* Grid Layouts - Asymmetric */
 .grid-asymmetric {
   display: grid;

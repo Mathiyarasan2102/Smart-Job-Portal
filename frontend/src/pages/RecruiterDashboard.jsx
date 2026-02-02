@@ -1,51 +1,90 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { Download, Check, Clock } from 'lucide-react';
+import { Download, Check, Clock, Trash2 } from 'lucide-react';
 
-// Simple Chart Components
-const BarChart = ({ data, maxVal }) => (
-    <div className="flex items-end gap-4 h-50 border-b border-border-light pb-2">
-        {data.map((d, i) => {
-            const height = maxVal > 0 ? (d.value / maxVal) * 100 : 0;
-            return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2 group relative">
-                    <span className="text-lg text-white font-bold transition-transform duration-300 group-hover:-translate-y-1">{d.value}</span>
-                    <div
-                        className="w-full max-w-10 bg-text-accent rounded-t transition-all duration-300 group-hover:brightness-110 group-hover:shadow-[0_0_15px_rgba(204,255,0,0.3)] group-hover:scale-y-105 origin-bottom"
-                        style={{ height: `${height}%` }}
-                    ></div>
-                    <span className="text-xs text-[#888] truncate w-full text-center">{d.label}</span>
-                </div>
-            );
-        })}
-    </div>
-);
+import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell } from 'recharts';
 
-// Double Bar Chart for Comparison
-const DoubleBarChart = ({ data, maxVal }) => (
-    <div className="flex items-end gap-4 h-64 border-b border-border-light pb-2 overflow-x-auto">
-        {data.map((d, i) => {
-            const h1 = maxVal > 0 ? (d.v1 / maxVal) * 100 : 0;
-            const h2 = maxVal > 0 ? (d.v2 / maxVal) * 100 : 0;
-            return (
-                <div key={i} className="min-w-10 flex-1 flex flex-col items-center gap-1 group relative">
-                    <div className="flex gap-1 items-end h-full w-full justify-center">
-                        {/* Bar 1: Jobs */}
-                        <div className="w-3 bg-blue-500 rounded-t relative group-hover:opacity-80 transition-all" style={{ height: `${h1}%` }}>
-                            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-blue-400 font-bold">{d.v1 > 0 ? d.v1 : ''}</span>
-                        </div>
-                        {/* Bar 2: Apps */}
-                        <div className="w-3 bg-[#ccff00] rounded-t relative group-hover:opacity-80 transition-all" style={{ height: `${h2}%` }}>
-                            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[#ccff00] font-bold">{d.v2 > 0 ? d.v2 : ''}</span>
-                        </div>
-                    </div>
-                    <span className="text-[10px] text-[#888] truncate w-full text-center">{d.label}</span>
-                </div>
-            );
-        })}
-    </div>
-);
+// Simple Chart Component using Recharts
+const formatYAxis = (tickItem) => {
+    if (tickItem >= 1000) {
+        return (tickItem / 1000).toString() + 'k';
+    }
+    return tickItem;
+};
+
+const BarChart = ({ data, color = "#ccff00" }) => {
+    if (!data || data.length === 0) return <p className="text-[#666]">No data available</p>;
+
+    return (
+        <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+                <RechartsBarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+                    <XAxis
+                        dataKey="label"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#888', fontSize: 12 }}
+                        dy={10}
+                    />
+                    <YAxis
+                        allowDecimals={false}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#888', fontSize: 12 }}
+                        tickFormatter={formatYAxis}
+                    />
+                    <RechartsTooltip
+                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                        contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#fff' }}
+                        itemStyle={{ color: '#fff' }}
+                    />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={40}>
+                        {data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={color || '#ccff00'} />
+                        ))}
+                    </Bar>
+                </RechartsBarChart>
+            </ResponsiveContainer>
+        </div>
+    );
+};
+
+// Double Bar Chart for Comparison using Recharts
+const DoubleBarChart = ({ data }) => {
+    if (!data || data.length === 0) return <p className="text-[#666]">No activity yet</p>;
+
+    return (
+        <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+                <RechartsBarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+                    <XAxis
+                        dataKey="label"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#888', fontSize: 12 }}
+                        dy={10}
+                    />
+                    <YAxis
+                        allowDecimals={false}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#888', fontSize: 12 }}
+                        tickFormatter={formatYAxis}
+                    />
+                    <RechartsTooltip
+                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                        contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#fff' }}
+                    />
+                    <Bar dataKey="v1" name="Jobs" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
+                    <Bar dataKey="v2" name="Applications" fill="#ccff00" radius={[4, 4, 0, 0]} barSize={20} />
+                </RechartsBarChart>
+            </ResponsiveContainer>
+        </div>
+    );
+};
 
 const StatCard = ({ title, value, icon: Icon }) => (
     <div className="bg-bg-card p-6 rounded-lg border border-border-light flex items-center gap-4">
@@ -68,6 +107,26 @@ const RecruiterDashboard = () => {
         statusDist: { pending: 0, reviewed: 0, shortlisted: 0, rejected: 0, hired: 0 },
         trend: []
     });
+
+    const handleDeleteJob = async (jobId) => {
+        if (!window.confirm("Are you sure you want to delete this job? This action cannot be undone.")) return;
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/jobs/${jobId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+
+            if (res.ok) {
+                setJobs(prev => prev.filter(j => j.id !== jobId));
+                setStats(prev => ({ ...prev, totalJobs: prev.totalJobs - 1 }));
+            } else {
+                console.error("Failed to delete job");
+            }
+        } catch (error) {
+            console.error("Error deleting job:", error);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -170,7 +229,7 @@ const RecruiterDashboard = () => {
                     {stats.totalJobs > 0 ? (
                         <BarChart
                             data={jobs.map(j => ({ label: j.title.substring(0, 10) + '...', value: j.application_count || 0 }))}
-                            maxVal={Math.max(...jobs.map(j => j.application_count || 0), 10)}
+                            maxVal={Math.max(...jobs.map(j => j.application_count || 0), 5)}
                         />
                     ) : (
                         <p className="text-[#666]">No jobs data</p>
@@ -182,7 +241,7 @@ const RecruiterDashboard = () => {
                     <h3 className="mb-6">Application Status</h3>
                     <BarChart
                         data={Object.entries(stats.statusDist).map(([key, val]) => ({ label: key, value: val }))}
-                        maxVal={Math.max(...Object.values(stats.statusDist), 10)}
+                        maxVal={Math.max(...Object.values(stats.statusDist), 5)}
                     />
                 </div>
             </div>
@@ -191,19 +250,28 @@ const RecruiterDashboard = () => {
             <h2 className="mb-6">Posted Jobs</h2>
             <div className="grid grid-asymmetric gap-6">
                 {jobs.map(job => (
-                    <div key={job.id} className="bg-bg-card p-6 rounded-lg border border-border-light flex justify-between items-center hover-lift">
-                        <div>
-                            <h3 className="mb-1 text-lg">{job.title}</h3>
-                            <p className="text-[#888] text-sm">{job.location} • {new Date(job.created_at).toLocaleDateString()}</p>
+                    <div key={job.id} className="bg-bg-card p-6 rounded-lg border border-border-light flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover-lift">
+                        <div className="flex-1">
+                            <h3 className="mb-1 text-lg leading-tight">{job.title}</h3>
+                            <p className="text-[#888] text-sm mt-1">{job.location} • {new Date(job.created_at).toLocaleDateString()}</p>
                         </div>
-                        <div className="flex items-center gap-6">
-                            <div className="text-right">
-                                <div className="text-2xl font-bold">{job.application_count || 0}</div>
-                                <div className="text-xs text-[#666]">Applicants</div>
+                        <div className="flex items-center gap-6 self-end sm:self-auto">
+                            <div className="text-right flex flex-col justify-center h-full">
+                                <div className="text-2xl font-bold leading-none">{job.application_count || 0}</div>
+                                <div className="text-xs text-[#666] mt-1">Applicants</div>
                             </div>
-                            <Link to={`/applications/${job.id}`} className="btn btn-primary btn-sm">
-                                View
-                            </Link>
+                            <div className="flex gap-2 items-center">
+                                <Link to={`/applications/${job.id}`} className="btn btn-primary btn-sm h-9 flex items-center">
+                                    View
+                                </Link>
+                                <button
+                                    onClick={() => handleDeleteJob(job.id)}
+                                    className="btn btn-outline btn-icon h-9 w-9 text-red-400 border-red-500/30 hover:bg-red-500/10 hover:border-red-500 transition-colors"
+                                    title="Delete Job"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}

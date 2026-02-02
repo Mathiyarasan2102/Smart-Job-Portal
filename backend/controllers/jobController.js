@@ -51,7 +51,7 @@ exports.getAllJobs = async (req, res) => {
                 whereConditions.push(`j.id IN (${placeholders})`);
                 queryParams.push(...idList);
             } else {
-                whereConditions.push("1=0"); 
+                whereConditions.push("1=0");
             }
         }
 
@@ -253,6 +253,34 @@ exports.createJob = async (req, res) => {
         res.status(500).json({
             status: 'error',
             message: 'Internal server error while creating job.'
+        });
+    }
+};
+
+exports.deleteJob = async (req, res) => {
+    try {
+        const jobId = req.params.id;
+        const recruiterId = req.user.id;
+
+        const [job] = await db.execute('SELECT recruiter_id FROM jobs WHERE id = ?', [jobId]);
+
+        if (job.length === 0) {
+            return res.status(404).json({ message: 'Job not found' });
+        }
+
+        if (job[0].recruiter_id !== recruiterId) {
+            return res.status(403).json({ message: 'You are not authorized to delete this job' });
+        }
+
+        await db.execute('DELETE FROM jobs WHERE id = ?', [jobId]);
+
+        res.status(200).json({ status: 'success', message: 'Job deleted successfully' });
+
+    } catch (err) {
+        console.error("DB Error in deleteJob:", err.message);
+        res.status(500).json({
+            status: 'error',
+            message: 'Internal server error while deleting job.'
         });
     }
 };
